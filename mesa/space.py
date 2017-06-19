@@ -15,8 +15,8 @@ MultiGrid: extension to Grid where each cell is a set of objects.
 # pylint: disable=invalid-name
 
 import itertools
-import random
 import math
+import random
 
 
 def accept_tuple_argument(wrapped_function):
@@ -598,3 +598,49 @@ class ContinuousSpace:
         x, y = pos
         return (x < self.x_min or x >= self.x_max or
                 y < self.y_min or y >= self.y_max)
+
+
+class NeighborList(object):
+    """ Grid where adjacency is stored, rather calculated. Used for fast neighbor lookups.
+
+
+    Performance:
+        Let n be number of Agents
+
+        Obtain agent by ID:
+            O(n) (worst case)
+        Obtain neighborhood of agent:
+            O(n) (worst case)
+        Calculate neighborhood (performed once at beginning):
+            O((n**2)log_2(n)) (worst case)
+            O(n**2 + n) (average case for small neighborhoods)
+
+
+    Methods:
+        get_neighbors: Returns the objects surrounding a given cell.
+    """
+
+    def __init__(self, distance_fn, neighborhood_size):
+        super().__init__(0, 0, False)
+        self.agent_list = []
+        self.agent_neighbors = {}
+        self.get_distance = distance_fn
+        self.neighborhood_size = neighborhood_size
+
+    def calc_neighbors(self):
+        sorted(self.agent_list, key=lambda a: a.unique_id)
+        print('Generating adjacency table:')
+        neighbors = []
+        for a in self.agent_list:
+            print('Agent #' + str(a.unique_id))
+            for b in self.agent_list:
+                neighbors.append(b)
+            self.agent_neighbors[a] = sorted(neighbors, key=lambda b: self.get_distance(a, b))
+
+    def add_agent(self, pos, agent):
+        x, y = pos
+        agent.pos = pos
+        self.agent_list.append(agent)
+
+    def get_neighbors_by_agent(self, agent):
+        return self.agent_neighbors[agent]

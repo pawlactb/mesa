@@ -14,6 +14,7 @@ MultiGrid: extension to Grid where each cell is a set of objects.
 # good reason to use one-character variable names for x and y.
 # pylint: disable=invalid-name
 
+import heapq
 import itertools
 import math
 import random
@@ -628,14 +629,21 @@ class NeighborList(object):
         self.neighborhood_size = neighborhood_size
 
     def calc_neighbors(self):
+        '''
+        After adding all agents to the model, calculate the neighbors
+
+
+        '''
         sorted(self.agent_list, key=lambda a: a.unique_id)
+
         print('Generating adjacency table:')
         neighbors = []
         for a in self.agent_list:
             print('Agent #' + str(a.unique_id))
             for b in self.agent_list:
                 neighbors.append(b)
-            self.agent_neighbors[a] = sorted(neighbors, key=lambda b: self.get_distance(a, b))
+            self.agent_neighbors[a] = heapq.nsmallest(self.neighborhood_size, neighbors)
+            # self.agent_neighbors[a] = sorted(neighbors, key=lambda b: self.get_distance(a, b))
 
     def add_agent(self, pos, agent):
         x, y = pos
